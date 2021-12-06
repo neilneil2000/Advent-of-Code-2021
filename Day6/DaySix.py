@@ -1,24 +1,33 @@
 def main():
-    lantern_fish = read_input_file("Day6/DaySixInput")
-    days = 2
-    age_by_days(lantern_fish,days)
+    input_file = "Day6/DaySixInput"
+    current_day = 0
+    lantern_fish = read_input_file(input_file)
+    day_target = 80
+    incremental_days = day_target - current_day
+    fish_summary = summarise_fish(lantern_fish)
+    age_by_days_fast(fish_summary,incremental_days)
+    current_day += incremental_days
+    total_fish = calculate_total_fish(fish_summary)
 
     print("DAY 6 PART 1 COMPLETE:")
     print("======================")
-    print("Number of fish: " + str(len(lantern_fish)))
-    lantern_fish = read_input_file("Day6/DaySixInput")
-    days = 256
-    fish_summary = summarise_fish(lantern_fish)
-    age_by_days_fast(fish_summary,days)
-    total_fish = 0
-    for fish in fish_summary:
-        total_fish += fish
-
+    print("Number of fish after " + str(current_day) + " days: " + str(total_fish))
+    
+    #lantern_fish = read_input_file(input_file)
+    day_target = 256
+    incremental_days = day_target - current_day
+    age_by_days_fast(fish_summary,incremental_days)
+    total_fish = calculate_total_fish(fish_summary)
 
     print("DAY 6 PART 2 COMPLETE:")
     print("======================")
-    print("Number of fish: " + str(total_fish))
-    
+    print("Number of fish after " + str(current_day) + " days: " + str(total_fish))
+
+def calculate_total_fish(fish_list):
+    total_fish = 0
+    for fish in fish_list:
+        total_fish += fish
+    return total_fish
 
 def age_by_days_fast(fish,days):
     for x in range(0,days):

@@ -3,7 +3,7 @@ import statistics
 def main():
     crab_locations = read_input_file("Day7/DaySevenInput")
     print(crab_locations)
-    med = statistics.median(crab_locations)
+    med = statistics.median(crab_locations) #Fast way for basic method
     print(med)
     pos, fuel = brute_force_exponential(crab_locations)
     print(pos)

@@ -5,11 +5,18 @@ import sys
 def main():
     crab_locations = read_input_file("Day7/DaySevenInput")
 
-    med = statistics.median(crab_locations) #Fast way for basic method
-    print(int(med))
-    pos, fuel = brute_force_exponential(crab_locations)
-    print(pos)
-    print(fuel)
+    end_pos = int(statistics.median(crab_locations)) #Fast way for basic method
+    fuel = int(calc_linear_fuel(end_pos,crab_locations))
+    print("DAY 7 PART 1 COMPLETE:")
+    print("======================")
+    print("Best End Position: " + str(end_pos))
+    print("Uses " + str(fuel) + " fuel")
+    print()
+    end_pos, fuel = brute_force_exponential(crab_locations)
+    print("DAY 7 PART 2 COMPLETE:")
+    print("======================")
+    print("Best End Position: " + str(end_pos))
+    print("Uses " + str(fuel) + " fuel")
 
 
 def brute_force_exponential(start_positions):
@@ -39,6 +46,12 @@ def triangle(x):
         t = triangle(x-1)
         return t + x
     return 1
+
+def calc_linear_fuel(end_position,start_positions):
+    working_total = 0
+    for crab in start_positions:
+            working_total += abs(crab-end_position)
+    return working_total
 
 
 def brute_force(start_positions):

@@ -5,7 +5,10 @@ class Map:
         self.low_points = set()
         self.risk_value = 0
         self.read_input_file(filename)
-        print(self.topology)
+        self.length = len(self.topology)
+        self.width = len(self.topology[0])
+        self.basin_id = 0 #Tracks largest marked basin
+        self.basin_sizes = []
 
 
     def read_input_file(self,filename):
@@ -19,6 +22,45 @@ class Map:
                     line[i] = int(line[i])
                 self.topology.append(line)
 
+    def calculate_basin_sizes(self):
+        for x in range(0,self.basin_id):
+            counter = 0
+            for row in self.basin_map:
+                for basin_value in row:
+                    if basin_value == x:
+                        counter += 1
+            self.basin_sizes.append(counter)
+
+
+    def assign_to_basin(self,row,column,basin_id):
+        if self.basin_map[row][column] is not None:
+            return False
+        if self.topology[row][column] >= 9:
+            return False
+        self.basin_map[row][column] = basin_id
+        if row > 0:
+            self.assign_to_basin(row - 1, column, basin_id)
+        if row < self.length - 1:
+            self.assign_to_basin(row + 1, column, basin_id)
+        if column > 0:
+            self.assign_to_basin(row, column - 1, basin_id)
+        if column < self.width - 1:
+            self.assign_to_basin(row, column + 1, basin_id)
+        return True
+
+    def sort_basin_sizes(self):
+        self.basin_sizes.sort()
+
+    def mark_basins(self):
+        basin_row = [None] * len(self.topology[0])
+        self.basin_map = []
+        for x in self.topology:
+            self.basin_map.append(basin_row.copy())
+        for row_id,row in enumerate(self.topology):
+            for column_id,height in enumerate(self.topology[row_id]):
+                if self.assign_to_basin(row_id,column_id,self.basin_id):
+                    self.basin_id += 1
+
 
     def calculate_risk(self):
         self.risk_value += len(self.low_points)
@@ -31,7 +73,7 @@ class Map:
             for j,w in enumerate(self.topology[i]):
                 if self.is_low_point(i,j):
                     self.low_points.add((i,j))
-                    print(f'Low point found. Height: {self.topology[i][j]} Location {i},{j}')
+                    #print(f'Low point found. Height: {self.topology[i][j]} Location {i},{j}')
 
     def is_low_point(self,i,j):
         height = self.topology[i][j]

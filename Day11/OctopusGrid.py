@@ -3,15 +3,15 @@ class Grid:
     def __init__(self,filename):
         self.energy_levels = []
         self.read_input_file(filename)
+        self.total_octopi = len(self.energy_levels) * len(self.energy_levels[0])
         self.total_flashes = 0
-        self.flashed = set() #Positions that have flashed this round
-        self.synchro_flag = False
+        self.steps_complete = 0
 
-    def process_flash(self,position):
+    def process_flash(self,position,flashed):
         """Process flash of octopus at *position* """
         impacted = self.calc_flash_impact(position)
         self.increment(impacted)
-        self.flashed.add(position)
+        flashed.add(position)
 
     def calc_flash_impact(self,position):
         """Return list of locations that would be impacted by a flash as *position* """
@@ -55,13 +55,14 @@ class Grid:
                     ready.add((row_index,column_index))
         return ready
 
-    def reset_flashed(self):
+    def reset_flashed(self,flashed):
         """Reset positions in flashed list to zero ready for next round"""
-        for position in self.flashed:
+        for position in flashed:
             x,y = position
             self.energy_levels[x][y] = 0
 
     def compute_next_step(self):
+        flashed = set()
         self.increment(None)
         while True:
             ready_to_flash = self.check_flashers()
@@ -69,20 +70,24 @@ class Grid:
                 break
             else:
                 for octopus in ready_to_flash:
-                    self.process_flash(octopus)
-                self.reset_flashed()
-        self.total_flashes += len(self.flashed)
-        if len(self.flashed) == len(self.energy_levels) * len(self.energy_levels[0]):
-            self.synchro_flag = True
-        self.flashed = set()
+                    self.process_flash(octopus,flashed)
+                self.reset_flashed(flashed)
+        self.total_flashes += len(flashed)
+        self.steps_complete += 1
+        return len(flashed)
 
+    def compute_steps_until_sync(self):
+        while True:
+            flashed_this_step = self.compute_next_step()
+            if flashed_this_step == self.total_octopi:
+                print(f'Syncronisation at step: {self.steps_complete}')
+                break
+        
 
     def compute_steps(self,steps):
         for step in range(0,steps):
             self.compute_next_step()
-            if self.synchro_flag == True:
-                print(f'SYNCHRONISATION DURING STEP: {step+1}')
-                self.synchro_flag = False
+
 
     def print_energy(self):
         print()

@@ -7,11 +7,13 @@ class Grid:
         self.total_flashes = 0
         self.steps_complete = 0
 
+
     def process_flash(self,position,flashed):
         """Process flash of octopus at *position* """
         impacted = self.calc_flash_impact(position)
         self.increment(impacted)
         flashed.add(position)
+
 
     def calc_flash_impact(self,position):
         """Return list of locations that would be impacted by a flash as *position* """
@@ -34,6 +36,7 @@ class Grid:
                 real_impacted.remove(point)
         return real_impacted
 
+
     def increment(self,positions):
         """Increment energy levels at all *positions* or everywhere if *positions* is None"""
         if positions is None:
@@ -46,6 +49,7 @@ class Grid:
                 row_index,column_index = position
                 self.energy_levels[row_index][column_index] += 1
         
+
     def check_flashers(self):
         """Find locations that are now eligible to flash"""
         ready = set()
@@ -55,11 +59,13 @@ class Grid:
                     ready.add((row_index,column_index))
         return ready
 
+
     def reset_flashed(self,flashed):
         """Reset positions in flashed list to zero ready for next round"""
         for position in flashed:
             x,y = position
             self.energy_levels[x][y] = 0
+
 
     def compute_next_step(self):
         flashed = set()
@@ -76,6 +82,7 @@ class Grid:
         self.steps_complete += 1
         return len(flashed)
 
+
     def compute_steps_until_sync(self):
         while True:
             flashed_this_step = self.compute_next_step()
@@ -87,6 +94,7 @@ class Grid:
     def compute_steps(self,steps):
         for step in range(0,steps):
             self.compute_next_step()
+        print(f'{self.total_flashes} flashes after {self.steps_complete} steps. ({steps} steps this run)')
 
 
     def print_energy(self):
@@ -94,6 +102,7 @@ class Grid:
         for row in self.energy_levels:
             print(row)
         print()
+
 
     def read_input_file(self,filename):
         with open(filename,'r') as f:

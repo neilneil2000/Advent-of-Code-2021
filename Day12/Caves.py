@@ -23,9 +23,9 @@ class Caves:
         next_steps = path.get_valid_next_steps()
         for step in next_steps:
             new_path = copy.deepcopy(path)
-            new_path.confirm_next_step(step)
-            if self.add_next_step(new_path):
-                self.paths.add(new_path)
+            if new_path.confirm_next_step(step):
+                if self.add_next_step(new_path):
+                    self.paths.add(new_path)
         del path
         
 

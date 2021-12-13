@@ -10,8 +10,8 @@ class Caves:
         self.read_input_file(filename)
     
     def print_paths(self):
-        for path in self.paths:
-            path.print_path()
+        #for path in self.paths:
+            #path.print_path()
         print(f'{len(self.paths)} paths found')
         
 

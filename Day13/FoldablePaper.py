@@ -5,6 +5,22 @@ class FoldablePaper:
         self.folds = []
         self.read_input_file(filename)
         self.folds_complete = 0
+
+    def print_points(self):
+        #Find biggest x and y co-ordinate
+        x_max=39
+        y_max=6
+        #build grid to size of co-ordinates
+        array = [[' ' for x in range(0,x_max)] for y in range(0,y_max)]
+        pass
+        #Add points to grid
+        for location in self.points:
+            array[location[1]][location[0]] = '#'
+        #print grid
+        for row in array:
+            for point in row:
+                print(point,end='')
+            print()
         
     def execute_next_fold(self):
         fold_line = self.folds[self.folds_complete]

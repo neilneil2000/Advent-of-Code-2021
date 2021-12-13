@@ -2,8 +2,10 @@ from FoldablePaper import FoldablePaper
 
 def main():
     paper = FoldablePaper("Day13\DayThirteenInput")
-    paper.execute_next_fold()
-    print(f'{len(paper.points)} points remain')
+    for fold in paper.folds:
+        paper.execute_next_fold()
+        print(f'{len(paper.points)} points remain')
+    paper.print_points()
     print('END')
 
 

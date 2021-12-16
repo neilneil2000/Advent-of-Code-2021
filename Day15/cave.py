@@ -1,4 +1,4 @@
-from os import get_inheritable
+from os import get_inheritable, path
 
 
 class Cave:
@@ -6,44 +6,70 @@ class Cave:
     def __init__(self,filename):
         self.lowest_path = 99999999999999999 #arbitrarily high
         self.read_input_file(filename)
+        self.cave_risk[0][0] = 0
         self.width = len(self.cave_risk[0])
         self.height = len(self.cave_risk)
+        self.cave_cumulative_risk = []
+        empty_row = [None] * self.width
+        for _ in range(0,self.height):
+            self.cave_cumulative_risk.append(empty_row.copy())
+        self.cave_cumulative_risk[self.height - 1][self.width - 1] = self.cave_risk[self.height - 1][self.width - 1]
 
-    def compute_path(self):
-        current_location = (0,0)
-        neighbours = self.get_neighbours(current_location)
+    def get_best(self, location, neighbour_target, from_location):
+        """
+        Tries to get to the end in a lower number of steps than {max}
+        Returns the number of steps if it can beat it
+        Returns None if it can't
+        """
+        x, y = location
+        path_found = False
+
+        known_best = self.cave_cumulative_risk[y][x]
+        if known_best is not None:
+            if known_best < neighbour_target:         
+                return known_best #If I know the answer, tell them
+            else:
+                return None
+        
+        my_risk = self.cave_risk[y][x]
+        neighbour_target -= my_risk
+        if neighbour_target <= 0:
+            return None #Can't beat it coming through me
+        
+        neighbours = self.get_neighbours(location)
+        if from_location in neighbours:
+            neighbours.remove(from_location) #Don't go back on yourself
+
         for neighbour in neighbours:
-            self.next_step(current_location,neighbour,0)
+            n = self.get_best(neighbour, neighbour_target, location)
+            if n is not None:
+                neighbour_target = min(neighbour_target, n)
+                path_found = True
+
+        if path_found == True:
+            my_best = neighbour_target + my_risk
+            self.cave_cumulative_risk[y][x] = my_best
+            return my_best
+        else:
+            return None
+
+
+
 
     def get_neighbours(self,location) -> list:
         neighbours = []
         x, y = location
         
         if x < self.width - 1:
-            neighbours.append((x + 1, y))
+            neighbours.append((x + 1, y)) #Look Right
         if y < self.height - 1:
-            neighbours.append((x, y + 1))
+            neighbours.append((x, y + 1)) #Look Down
         if x > 0:
-            neighbours.append((x - 1, y))
+            neighbours.append((x - 1, y)) #Look Left
         if y > 0:
-            neighbours.append((x, y - 1))
+            neighbours.append((x, y - 1)) #Look Up
         
         return neighbours
-
-
-    def next_step(self, from_location: tuple, location: tuple, path_risk: int) -> None:
-        x, y = location
-        path_risk += self.cave_risk[y][x]
-        if path_risk >= self.lowest_path:
-            return
-        if location == (self.width - 1, self.height - 1):
-            self.lowest_path = path_risk
-            print(f'Better Path Found. Value: {path_risk}')
-            return
-        neighbours = self.get_neighbours(location)
-        neighbours.remove(from_location)
-        for neighbour in neighbours:
-            self.next_step(location,neighbour,path_risk)
 
 
 

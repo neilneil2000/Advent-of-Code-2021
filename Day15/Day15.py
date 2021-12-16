@@ -1,9 +1,10 @@
 from cave import Cave
 
 def main():
-    my_cave = Cave("Day15\DayFifteenInput")
-    my_cave.compute_path()
-    print(f'Lowest Path Found has cost: {my_cave.lowest_path}')
+    my_cave = Cave("Day15\DayFifteenTestInput")
+
+    lowest_path = my_cave.get_best((0,0),99999999999,(0,0))
+    print(f'Lowest Path Found has cost: {lowest_path}')
     print('END')
 
 

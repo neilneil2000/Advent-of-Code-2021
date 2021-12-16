@@ -10,9 +10,13 @@ class Cave:
         self.width = len(self.cave_risk[0])
         self.height = len(self.cave_risk)
         self.cave_cumulative_risk = []
+        self.cave_at_least_risk = []
         empty_row = [None] * self.width
-        for _ in range(0,self.height):
+        for _ in range(0, self.height):
             self.cave_cumulative_risk.append(empty_row.copy())
+        for i in range(0, self.height):
+            self.cave_at_least_risk.append(self.cave_risk[i].copy())
+
         self.cave_cumulative_risk[self.height - 1][self.width - 1] = self.cave_risk[self.height - 1][self.width - 1]
 
     def get_best(self, location, neighbour_target, from_location):
@@ -30,7 +34,10 @@ class Cave:
                 return known_best #If I know the answer, tell them
             else:
                 return None
-        
+
+        if neighbour_target <= self.cave_at_least_risk[y][x]:
+            return None
+
         my_risk = self.cave_risk[y][x]
         neighbour_target -= my_risk
         if neighbour_target <= 0:
@@ -49,9 +56,10 @@ class Cave:
         if path_found == True:
             my_best = neighbour_target + my_risk
             self.cave_cumulative_risk[y][x] = my_best
-            print(f'{time()}: Value at Location ({x},{y}) confirmed as {my_best}')
+            #print(f'{time()}: Value at Location ({x},{y}) confirmed as {my_best}')
             return my_best
         else:
+            self.cave_at_least_risk[y][x] = max(self.cave_at_least_risk[y][x],neighbour_target + my_risk)
             return None
 
 

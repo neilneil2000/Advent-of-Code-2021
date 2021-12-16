@@ -1,11 +1,14 @@
 from time import time
+from sys import setrecursionlimit
 
 
 class Cave:
 
     def __init__(self,filename):
+        setrecursionlimit(1000000)
         self.lowest_path = 99999999999999999 #arbitrarily high
         self.read_input_file(filename)
+        self.create_mega_map()
         self.cave_risk[0][0] = 0
         self.width = len(self.cave_risk[0])
         self.height = len(self.cave_risk)
@@ -80,6 +83,35 @@ class Cave:
         
         return neighbours
 
+    def print_map(self):
+        for row in self.cave_risk:
+            for item in row:
+                print(f'{item}',end='')
+            print()
+
+
+    def create_mega_map(self):
+        #Make it mega wide
+        for y in range(0,self.height):
+            row_pointer = self.cave_risk[y].copy()
+            for _ in range(0,4):
+                self.cave_risk[y].extend(row_pointer.copy())
+        #Make it mega tall
+        for _ in range(0,4):
+            for y in range(0,self.height):
+                self.cave_risk.append(self.cave_risk[y].copy())
+        
+        #Set Correct Values
+        for y,row in enumerate(self.cave_risk):
+            for x,_ in enumerate(row):
+                inc = int(x / self.width) + int(y / self.height)                
+                self.cave_risk[y][x] += inc
+                if self.cave_risk[y][x] > 9:
+                    self.cave_risk[y][x] -= 9
+
+        #Reset Height & Width Parameters
+        self.height = len(self.cave_risk)
+        self.width = len(self.cave_risk[0])
 
 
     def read_input_file(self,filename):

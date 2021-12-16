@@ -1,4 +1,4 @@
-from os import get_inheritable, path
+from time import time
 
 
 class Cave:
@@ -49,6 +49,7 @@ class Cave:
         if path_found == True:
             my_best = neighbour_target + my_risk
             self.cave_cumulative_risk[y][x] = my_best
+            print(f'{time()}: Value at Location ({x},{y}) confirmed as {my_best}')
             return my_best
         else:
             return None

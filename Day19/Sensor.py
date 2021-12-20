@@ -4,6 +4,9 @@ class Sensor:
 
     def __init__(self, id):
         self.sensor_id = id
+        self.direction = 0 # 6 unique directions
+        self.orientation = 0 # 4 unique orientations
+        self.orientation_counter = 0
         self.orientation = (0,0,0) # (x,y,z) orientation relative to Sensor 0
         self.offset = (0,0,0) #(x,y,z) offset relative to Sensor 0
         if id == 0:
@@ -17,6 +20,55 @@ class Sensor:
         self.offset = offset
         for i, beacon in enumerate(self.beacons):
             self.beacons[i] = self.tuple_add(beacon, offset)
+
+    def rotate_to_next(self) -> None:
+        counter = self.orientation_counter + 1
+        if counter == 24:
+            counter = 0
+        self.orientation_counter = counter
+        if counter == 0:
+            self.beacons = self.original_beacons.copy()
+        elif counter == 4 or counter == 8 or counter == 12:
+            self.rotate_about_x()
+            self.rotate_about_z()
+        elif counter == 16:
+            self.rotate_about_x()
+            self.rotate_about_z()
+            self.rotate_about_y()
+        elif counter == 20:
+            self.rotate_about_x()
+            self.rotate_about_y()
+            self.rotate_about_y()
+        else:
+            self.rotate_about_x()
+
+    def rotate_about_x(self) -> None:
+        for i, beacon in enumerate(self.beacons):
+            x, y, z = beacon
+            y ^= z
+            z ^= y
+            y ^= z
+            y *= -1
+            self.beacons[i] = (x, y, z)
+
+    def rotate_about_y(self) -> None:
+        for i, beacon in enumerate(self.beacons):
+            x, y, z = beacon
+            x ^= z
+            z ^= x
+            x ^= z
+            z *= -1
+            self.beacons[i] = (x, y, z)
+
+    def rotate_about_z(self) -> None:
+        for i, beacon in enumerate(self.beacons):
+            x, y, z = beacon
+            x ^= y
+            y ^= x
+            x ^= y
+            y *= -1
+            self.beacons[i] = (x, y, z)
+
 
     def rotate(self, rotation: tuple) -> None:
         self.orientation = rotation
@@ -37,7 +89,7 @@ class Sensor:
             y ^= z
             z ^= y
             y ^= z
-            z *= -1
+            y *= -1
             
         #Rotate about y Axis
         for _ in range(0, yr):
@@ -51,7 +103,7 @@ class Sensor:
             x ^= y
             y ^= x
             x ^= y
-            y *= -1
+            z *= -1
                     
         return (x, y, z)
 

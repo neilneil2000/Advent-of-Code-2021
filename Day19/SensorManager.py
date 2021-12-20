@@ -9,6 +9,22 @@ class SensorManager:
         self.sensors = {}
         self.beacons = set()
 
+    def align_all_sensors(self):
+        confirmed_sensors = set()
+        checked_pairs = set()
+        while len(confirmed_sensors) < len(self.sensors):
+            for id,sensor in self.sensors.items():
+                if sensor.location_confirmed == True:
+                    confirmed_sensors.add(id)
+            for sensor_id in self.sensors.keys():
+                for confirmed_id in confirmed_sensors:
+                    if self.sensors[sensor_id].location_confirmed == False:
+                        if (confirmed_id, sensor_id) not in checked_pairs:
+                            self.align_sensors(confirmed_id, sensor_id)
+                            checked_pairs.add((confirmed_id, sensor_id))
+
+
+
     def confirm_beacons(self):
         for sensor in self.sensors.values():
             for beacon in sensor.beacons:
@@ -16,22 +32,17 @@ class SensorManager:
 
     def align_sensors(self, sensor_a_id, sensor_b_id):
         #for each rotation check whether there's alignment (this can be optimised to just unique rotations
-        for xr in range(0, 360, 90):
-            for yr in range(0, 360, 90):
-                for zr in range(0, 360, 90):
-                    rotation = (xr, yr, zr)
-                    self.sensors[sensor_b_id].rotate(rotation)
-                    offset_count = self.offset_between_sensors(sensor_a_id,sensor_b_id)
-                    if max(offset_count.values()) >= 12:
-                        #print(f'Rotation of ({xr}, {yr}, {zr}) has {max(offset_count.values())} matches')
-                        for location,count in offset_count.items():
-                            if count>=12:
-                                print(f'Sensor: {sensor_b_id} confirmed at {location}: {count} with rotation ({xr}, {yr}, {zr})')
-                                self.sensors[sensor_b_id].set_offset(location)
-                                self.sensors[sensor_b_id].location_confirmed = True
-                                return True
-        print(f'Alignment not found between Sensor {sensor_a_id} and {sensor_b_id}')
-        return False # Did not find an alignment
+        for step in range(0,24):
+            offset_count = self.offset_between_sensors(sensor_a_id,sensor_b_id)
+            if max(offset_count.values()) >= 12:
+                for location,count in offset_count.items():
+                    if count>=12:
+                        print(f'Sensor: {sensor_b_id} confirmed at {location}: {count} ) - Validator: {sensor_a_id}')
+                        self.sensors[sensor_b_id].set_offset(location)
+                        self.sensors[sensor_b_id].location_confirmed = True
+                        return True
+            self.sensors[sensor_b_id].rotate_to_next()
+        return False
 
     def tuple_subtract(self, a: tuple, b:tuple) -> tuple:
         """Subtracts each element in tuple b from tuple a"""

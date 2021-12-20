@@ -13,6 +13,9 @@ def main():
     outer_packet = Packet(binary_string)
     total_version = outer_packet.get_total_version()
     print(f'Sum of Version Numbers: {total_version}')
+
+    outer_packet.calculate_literal()
+    print(f'Outermost Packet = {outer_packet.literal_value}')
     print(f'END')
 
 

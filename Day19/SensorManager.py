@@ -9,6 +9,29 @@ class SensorManager:
         self.sensors = {}
         self.beacons = set()
 
+    def get_biggest_distance(self) -> int:
+        max_distance = 0
+        for sensor_a_id in range(0,len(self.sensors)):
+            for sensor_b_id in range(sensor_a_id+1,len(self.sensors)):
+                new_distance = self.calc_distance_between_sensors(sensor_a_id, sensor_b_id)
+                max_distance = max(max_distance, new_distance)
+        return max_distance
+    
+    def calc_distance_between_sensors(self, a_id, b_id):
+        a_location = self.sensors[a_id].offset
+        b_location = self.sensors[b_id].offset
+        difference = self.tuple_subtract(a_location, b_location)
+        x, y, z = difference
+        if x < 0:
+            x *= -1
+        if y < 0:
+            y *= -1
+        if z < 0:
+            z *= -1
+        return x + y + z
+
+
+
     def align_all_sensors(self):
         confirmed_sensors = set()
         checked_pairs = set()

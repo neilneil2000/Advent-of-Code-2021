@@ -1,4 +1,10 @@
+from Reactor import Reactor
+
 def main():
+
+    my_lovely_reactor = Reactor()
+    my_lovely_reactor.test_overlap()
+
     input = read_input_file("Day22\DayTwentyTwoInput")
     values = process_input_file(input)
     answer = how_many_on_basic(values)

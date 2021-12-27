@@ -1,6 +1,7 @@
 from enum import Enum
+import time
 
-class Rules:
+class Rules(Enum):
     no_rules = 0
     transit_only = 1
     amber_only = 3
@@ -47,12 +48,12 @@ class Amphipod:
 
 class AmphipodGrid:
 
-    ROOMS = {   'A' : { (3,2), (3,3)},# (3,4), (3,5) },
-                'B' : { (5,2), (5,3)},# (5,4), (5,5) },
-                'C' : { (7,2), (7,3)},# (7,4), (7,5) },
-                'D' : { (9,2), (9,3)},# (9,4), (9,5) },
-                #'All': { (3,2), (3,3), (3,4), (3,5), (5,2), (5,3), (5,4), (5,5), (7,2), (7,3), (7,4), (7,5), (9,2), (9,3), (9,4), (9,5) }}
-                'All': { (3,2), (3,3), (5,2), (5,3), (7,2), (7,3), (9,2), (9,3) }}
+    ROOMS = {   'A' : { (3,2), (3,3), (3,4), (3,5) },
+                'B' : { (5,2), (5,3), (5,4), (5,5) },
+                'C' : { (7,2), (7,3), (7,4), (7,5) },
+                'D' : { (9,2), (9,3), (9,4), (9,5) },
+                'All': { (3,2), (3,3), (3,4), (3,5), (5,2), (5,3), (5,4), (5,5), (7,2), (7,3), (7,4), (7,5), (9,2), (9,3), (9,4), (9,5) }}
+                #'All': { (3,2), (3,3), (5,2), (5,3), (7,2), (7,3), (9,2), (9,3) }}
 
     HALL_STOP_POINTS = { (1,1), (2,1), (4,1), (6,1), (8,1), (10,1), (11,1) }
         
@@ -70,20 +71,6 @@ class AmphipodGrid:
         self.setup_warren(warren_data)
         self.check_rooms()
         self.is_complete()
-
-    def force_game(self):
-        total_cost = 0
-        total_cost +=self.amphipods[2].move((4,1))
-        total_cost +=self.amphipods[1].move((7,2))
-        total_cost +=self.amphipods[5].move((6,1))
-        total_cost +=self.amphipods[2].move((5,3))
-        total_cost +=self.amphipods[0].move((5,2))
-        total_cost +=self.amphipods[3].move((8,1))
-        total_cost +=self.amphipods[7].move((10,1))
-        total_cost +=self.amphipods[3].move((9,3))
-        total_cost +=self.amphipods[5].move((9,2))
-        total_cost +=self.amphipods[7].move((3,2))
-        print(f'Total cost: {total_cost}')
 
     def min_score_from_here(self):
         """Returns a rough minimum score from here, always lower than reality"""
@@ -118,15 +105,17 @@ class AmphipodGrid:
             print(f'   Attempting {move[0].colour} : {move[0].position}  -> {move[1]} as first move  ')
             print(f'*****************************************************')
             pod, location  = move
+            start_time = time.perf_counter()
             solution_cost = (self.move_manager(pod, location, 0, best_cost))
+            end_time = time.perf_counter()
             prev = pod.rewind()
             if prev != location:
                 print(f"It's Gone Wrong!")
             self.location_occupancy[pod.position] = True
             self.location_occupancy[prev] = False
             best_cost = min(best_cost, solution_cost)
-            print()
-            print(solution_cost)
+            print(f'Execution Time : {end_time - start_time:0.6f}')
+            print(f'Best so far: {solution_cost}')
             print()
                 
         self.winning_score = best_cost

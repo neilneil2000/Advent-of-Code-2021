@@ -1,14 +1,7 @@
-from enum import Enum
-
-class instructions:
-        inp = 0
-        mul = 1
-        add = 2
-
 class ALU:
 
     def __init__(self):
-        self.w = { 0: {'a' : {1,2,3,4,5,6,7,8,9},
+        self.w = { 0: { 'a' : {1,2,3,4,5,6,7,8,9},
             'b' : {1,2,3,4,5,6,7,8,9},
             'c' : {1,2,3,4,5,6,7,8,9},
             'd' : {1,2,3,4,5,6,7,8,9},
@@ -53,7 +46,7 @@ class ALU:
             'm' : {1,2,3,4,5,6,7,8,9},
             'n' : {1,2,3,4,5,6,7,8,9}
             }}
-        self.z = { 0: {'a' : {1,2,3,4,5,6,7,8,9},
+        self.z = { 0: { 'a' : {1,2,3,4,5,6,7,8,9},
             'b' : {1,2,3,4,5,6,7,8,9},
             'c' : {1,2,3,4,5,6,7,8,9},
             'd' : {1,2,3,4,5,6,7,8,9},
@@ -68,20 +61,44 @@ class ALU:
             'm' : {1,2,3,4,5,6,7,8,9},
             'n' : {1,2,3,4,5,6,7,8,9}
             }}
+        self.model_numbers = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n']
 
     def add(self, operand_a, operand_b):
         output = {}
-        if type(operand_b) == type(int()):
-            print(f'Write Code to Handle adding an integer value')
-        else:
+        literal_flag = False
+
+        literal_flag, operand_a = self.process_operand(operand_a)
+        literal_flag, operand_b = self.process_operand(operand_b)
+    
+        if literal_flag == True: #Register + literal (no clashes possible)
+            for a_value in operand_a:
+                new_value = a_value + operand_b
+                output.update({new_value: operand_a[a_value]})
+        else: #Register + Register
             for a_value in operand_a:
                 for b_value in operand_b:
                     new_value = a_value + b_value
+                    possibles = {}
+                    for letter in self.model_numbers:
+                        letter_possibles = operand_a[a_value][letter].intersection(operand_b[b_value][letter])
+                        possibles.update( { letter: letter_possibles } )
                     if new_value in output:
-                        print(f'Write Code to handle this')
-                        pass
+                        for letter in self.model_numbers:
+                            letter_possibles = possibles[letter].union(output[new_value][letter])
+                            possibles.update( { letter: letter_possibles } )
                     else:
-                        output.update({new_value: {operand_a[a_value]}}) #This is not correct
+                        output.update({new_value: possibles})
+
+        #Assign Output
+        if operand_a == self.w:
+            self.w = output
+        elif operand_a == self.x:
+            self.x = output
+        elif operand_a == self.y:
+            self.y = output
+        elif operand_a == self.z:
+            self.z = output
+
 
 
     def mul(self, operand_a, operand_b):
@@ -228,6 +245,8 @@ class ALU:
         pass
 
     def process_operand(self, operand):
+        """Takes an operand and returns the pointer to the relevant register or in the case of a literal, just itself"""
+        literal_flag = False
         if operand == 'w':
             operand = self.w
         elif operand == 'x':
@@ -236,9 +255,12 @@ class ALU:
             operand = self.y
         elif operand == 'z':
             operand = self.z
-        return operand
+        else:
+            operand = int(operand)
+            literal_flag = True
+        return literal_flag, operand
 
-    def execute_instruction(self, instruction: instructions, operand_a, operand_b=None):
+    def execute_instruction(self, instruction, operand_a, operand_b=None):
         operand_a = self.process_operand(operand_a)
         if operand_b is not None:
             operand_b = self.process_operand(operand_b)

@@ -83,31 +83,10 @@ def main():
                                                                                                 print(f'z_12 = {l_out}')
                                                                                                 print(f'z_13 = {m_out}')
                                                                                                 print(f'z_14 = {n_out}')
+                                                                                                return
 
 
-
-
-
-
-
-
-
-
-    for digit in digits:
-        digit.set_inputs(next_inputs)
-        start = time.perf_counter()
-        digit.method_one()
-        digit.method_two()
-        end = time.perf_counter()
-        next_inputs = digit.valid_outputs
-        print(f'{len(digit.valid_outputs)} Valid outputs found in {int(end-start)} seconds')
-
-    if 0 in digits[-1].valid_outputs:
-        print(f'Zero Found in final output :-)')
-    else:
-        print(f'No zero found :-(')
-
-    
+  
     
 
 if __name__ == "__main__":

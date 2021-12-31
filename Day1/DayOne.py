@@ -11,15 +11,19 @@ def main():
     print("Total Increments: " + str(count))
 
 
-def how_many_increments(data):
+def how_many_increments(data: list) -> int:
+    """Returns int representing number of times an entry in a list is a larger number than that before it"""
     count = 0
     for x in range(1,len(data)):
         if data[x] > data[x-1]:
             count += 1
     return count
 
-def create_sliding_window(input):
+def create_sliding_window(input: list) -> int:
+    """Return new list where each entry is the sum of three entries in the previous list"""
     output =[]
+    if len(input) < 3:
+        return None
     for x in range(2,len(input)):
         output.append(input[x]+input[x-1]+input[x-2])
     return output

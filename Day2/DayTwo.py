@@ -1,7 +1,7 @@
 import csv
 
 def main():
-    input = read_from_file("DayTwoInput")
+    input = read_from_file("Day2\DayTwoInput")
     horizontal, depth = calculate_position(input)
     print("DAY 2 PART 1 RESULT")
     print("===================")
@@ -14,7 +14,9 @@ def main():
     print("Horizontal: " + str(horizontal) + " Depth: " + str(depth))
     print("Result: " + str(horizontal*depth))
 
-def calculate_position(directions):
+def calculate_position(directions: list) -> int:
+    """Using Part 1 Instructions convert list of ["instruction",amount] \
+        to calculate final horizontal and depth positions"""
     horizontal = 0
     depth = 0
     for x in directions:
@@ -26,7 +28,10 @@ def calculate_position(directions):
             depth += int(x[1])
     return horizontal, depth
 
-def calculate_position_two(directions):
+def calculate_position_two(directions: list) -> int:
+    """Using Part 2 Instructions convert list of ["instruction",amount] \
+        to calculate final horizontal and depth positions
+        Note: this uses aim as an interim value and does not return it"""
     horizontal = 0
     depth = 0
     aim = 0

@@ -1,3 +1,6 @@
+from typing import NoReturn
+
+
 class ALU:
 
     def __init__(self):
@@ -62,60 +65,125 @@ class ALU:
             'n' : {1,2,3,4,5,6,7,8,9}
             }}
         self.model_numbers = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n']
+        self.model_number_pointer = 0
 
-    def add(self, operand_a, operand_b):
+    def arithmetic_op(self, instruction: str, operand_a: int, operand_b: int) -> int:
+        if instruction == 'add':
+            result = operand_a + operand_b
+        elif instruction == 'mul':
+            result = operand_a * operand_b
+        elif instruction == 'div':
+            result = int(operand_a / operand_b)
+        elif instruction == 'mod':
+            result = operand_a % operand_b
+        else:
+            print(f'UNKNOWN INSTRUCTION')
+        return result
+
+    def arithmetic(self, instruction: str, operand_a: str, operand_b: str) -> None:
+        output = {}
+        literal_flag = False
+
+        literal_flag, operand_a = self.process_operand(operand_a)
+        literal_flag, operand_b = self.process_operand(operand_b) #Overwrite literal_flag as operand_a is never a literal
+    
+        if literal_flag == True: #Register + literal
+            for a_value in operand_a:
+                new_value = self.arithmetic_op(instruction, a_value, operand_b)
+                possibles = {}
+                for letter in self.model_numbers:
+                        letter_possibles = operand_a[a_value][letter]
+                        possibles.update( { letter: letter_possibles } )
+                if new_value in output:
+                    for letter in self.model_numbers:
+                        letter_possibles = operand_a [a_value][letter].union(output[new_value][letter])
+                        possibles.update( { letter: letter_possibles } )
+                    output.update( { new_value: possibles} )
+                else:
+                    output.update({new_value: possibles})
+        else: #Register + Register
+            for a_value in operand_a:
+                for b_value in operand_b:
+                    #Check that there are some model number values that would satisfy this
+                    overlap = True
+                    for letter in self.model_numbers:
+                        if len(operand_a[a_value][letter].intersection(operand_b[b_value][letter])) == 0:
+                            overlap = False
+                    if overlap == True:
+                        new_value = self.arithmetic_op(instruction, a_value, b_value)
+                        possibles = {}
+                        for letter in self.model_numbers:
+                            letter_possibles = operand_a[a_value][letter].intersection(operand_b[b_value][letter])
+                            possibles.update( { letter: letter_possibles } )
+                        if new_value in output:
+                            for letter in self.model_numbers:
+                                letter_possibles = possibles[letter].union(output[new_value][letter])
+                                possibles.update( { letter: letter_possibles } )
+                            output.update( { new_value: possibles} )
+                        else:
+                            output.update({new_value: possibles})
+
+        #Assign Output
+        if id(operand_a) == id(self.w):
+            self.w = output
+        elif id(operand_a) == id(self.x):
+            self.x = output
+        elif id(operand_a) == id(self.y):
+            self.y = output
+        elif id(operand_a) == id(self.z):
+            self.z = output
+
+    def equal(self, operand_a: str, operand_b: str) -> None:
         output = {}
         literal_flag = False
 
         literal_flag, operand_a = self.process_operand(operand_a)
         literal_flag, operand_b = self.process_operand(operand_b)
     
-        if literal_flag == True: #Register + literal (no clashes possible)
+        if literal_flag == True:
             for a_value in operand_a:
-                new_value = a_value + operand_b
-                output.update({new_value: operand_a[a_value]})
-        else: #Register + Register
+                if a_value == operand_b:
+                    new_value = 1
+                else:
+                    new_value = 0
+                output.update( { new_value: operand_a [ a_value ] } )
+        else:
             for a_value in operand_a:
                 for b_value in operand_b:
-                    new_value = a_value + b_value
-                    possibles = {}
+                    #Check that there are some model number values that would satisfy this
+                    overlap = True
                     for letter in self.model_numbers:
-                        letter_possibles = operand_a[a_value][letter].intersection(operand_b[b_value][letter])
-                        possibles.update( { letter: letter_possibles } )
-                    if new_value in output:
+                        if len(operand_a[a_value][letter].intersection(operand_b[b_value][letter])) == 0:
+                            overlap = False
+                    if overlap == True:
+                        if a_value == b_value:
+                            new_value = 1
+                        else:
+                            new_value = 0
+                        possibles = {}
                         for letter in self.model_numbers:
-                            letter_possibles = possibles[letter].union(output[new_value][letter])
+                            letter_possibles = operand_a[a_value][letter].intersection(operand_b[b_value][letter])
                             possibles.update( { letter: letter_possibles } )
-                    else:
-                        output.update({new_value: possibles})
-
+                        if new_value in output:
+                            for letter in self.model_numbers:
+                                letter_possibles = possibles[letter].union(output[new_value][letter])
+                                possibles.update( { letter: letter_possibles } )
+                            output.update( { new_value: possibles} )
+                        else:
+                            output.update( { new_value: possibles } )
         #Assign Output
-        if operand_a == self.w:
+        if id(operand_a) == id(self.w):
             self.w = output
-        elif operand_a == self.x:
+        elif id(operand_a) == id(self.x):
             self.x = output
-        elif operand_a == self.y:
+        elif id(operand_a) == id(self.y):
             self.y = output
-        elif operand_a == self.z:
+        elif id(operand_a) == id(self.z):
             self.z = output
-
-
-
-    def mul(self, operand_a, operand_b):
-        output = {}
-        for current_value in operand_a:
-            new_value = current_value * operand_b
-            if new_value in output:
-                for element in output[new_value]:
-                    print(f'Need to handle this properly!')
-                    print(element)
-            else:
-                output.update({new_value : operand_a[current_value]})
-        
-
+                    
     def inp(self):
         #Assume inp is always w
-        w = { 1: {'a' : {1}, 
+        w = { 1: {'a' : {1,2,3,4,5,6,7,8,9}, 
             'b' : {1,2,3,4,5,6,7,8,9},
             'c' : {1,2,3,4,5,6,7,8,9},
             'd' : {1,2,3,4,5,6,7,8,9},
@@ -129,7 +197,7 @@ class ALU:
             'l' : {1,2,3,4,5,6,7,8,9},
             'm' : {1,2,3,4,5,6,7,8,9},
             'n' : {1,2,3,4,5,6,7,8,9}},
-            2: {'a' : {2}, 
+            2: {'a' : {1,2,3,4,5,6,7,8,9}, 
             'b' : {1,2,3,4,5,6,7,8,9},
             'c' : {1,2,3,4,5,6,7,8,9},
             'd' : {1,2,3,4,5,6,7,8,9},
@@ -143,7 +211,7 @@ class ALU:
             'l' : {1,2,3,4,5,6,7,8,9},
             'm' : {1,2,3,4,5,6,7,8,9},
             'n' : {1,2,3,4,5,6,7,8,9}},
-            3: {'a' : {3}, 
+            3: {'a' : {1,2,3,4,5,6,7,8,9}, 
             'b' : {1,2,3,4,5,6,7,8,9},
             'c' : {1,2,3,4,5,6,7,8,9},
             'd' : {1,2,3,4,5,6,7,8,9},
@@ -157,7 +225,7 @@ class ALU:
             'l' : {1,2,3,4,5,6,7,8,9},
             'm' : {1,2,3,4,5,6,7,8,9},
             'n' : {1,2,3,4,5,6,7,8,9}},
-            4: {'a' : {4}, 
+            4: {'a' : {1,2,3,4,5,6,7,8,9}, 
             'b' : {1,2,3,4,5,6,7,8,9},
             'c' : {1,2,3,4,5,6,7,8,9},
             'd' : {1,2,3,4,5,6,7,8,9},
@@ -171,7 +239,7 @@ class ALU:
             'l' : {1,2,3,4,5,6,7,8,9},
             'm' : {1,2,3,4,5,6,7,8,9},
             'n' : {1,2,3,4,5,6,7,8,9}},
-            5: {'a' : {5}, 
+            5: {'a' : {1,2,3,4,5,6,7,8,9}, 
             'b' : {1,2,3,4,5,6,7,8,9},
             'c' : {1,2,3,4,5,6,7,8,9},
             'd' : {1,2,3,4,5,6,7,8,9},
@@ -185,7 +253,7 @@ class ALU:
             'l' : {1,2,3,4,5,6,7,8,9},
             'm' : {1,2,3,4,5,6,7,8,9},
             'n' : {1,2,3,4,5,6,7,8,9}},
-            6: {'a' : {6}, 
+            6: {'a' : {1,2,3,4,5,6,7,8,9}, 
             'b' : {1,2,3,4,5,6,7,8,9},
             'c' : {1,2,3,4,5,6,7,8,9},
             'd' : {1,2,3,4,5,6,7,8,9},
@@ -199,7 +267,7 @@ class ALU:
             'l' : {1,2,3,4,5,6,7,8,9},
             'm' : {1,2,3,4,5,6,7,8,9},
             'n' : {1,2,3,4,5,6,7,8,9}},
-            7: {'a' : {7}, 
+            7: {'a' : {1,2,3,4,5,6,7,8,9}, 
             'b' : {1,2,3,4,5,6,7,8,9},
             'c' : {1,2,3,4,5,6,7,8,9},
             'd' : {1,2,3,4,5,6,7,8,9},
@@ -213,7 +281,7 @@ class ALU:
             'l' : {1,2,3,4,5,6,7,8,9},
             'm' : {1,2,3,4,5,6,7,8,9},
             'n' : {1,2,3,4,5,6,7,8,9}},
-            8: {'a' : {8}, 
+            8: {'a' : {1,2,3,4,5,6,7,8,9}, 
             'b' : {1,2,3,4,5,6,7,8,9},
             'c' : {1,2,3,4,5,6,7,8,9},
             'd' : {1,2,3,4,5,6,7,8,9},
@@ -227,7 +295,7 @@ class ALU:
             'l' : {1,2,3,4,5,6,7,8,9},
             'm' : {1,2,3,4,5,6,7,8,9},
             'n' : {1,2,3,4,5,6,7,8,9}},
-            9: {'a' : {9}, 
+            9: {'a' : {1,2,3,4,5,6,7,8,9}, 
             'b' : {1,2,3,4,5,6,7,8,9},
             'c' : {1,2,3,4,5,6,7,8,9},
             'd' : {1,2,3,4,5,6,7,8,9},
@@ -241,8 +309,10 @@ class ALU:
             'l' : {1,2,3,4,5,6,7,8,9},
             'm' : {1,2,3,4,5,6,7,8,9},
             'n' : {1,2,3,4,5,6,7,8,9}}}
+        for number in w:
+            w[number].update({ self.model_numbers[self.model_number_pointer] : {number} })
+        self.model_number_pointer += 1
         self.w = w
-        pass
 
     def process_operand(self, operand):
         """Takes an operand and returns the pointer to the relevant register or in the case of a literal, just itself"""
@@ -260,16 +330,13 @@ class ALU:
             literal_flag = True
         return literal_flag, operand
 
-    def execute_instruction(self, instruction, operand_a, operand_b=None):
-        operand_a = self.process_operand(operand_a)
-        if operand_b is not None:
-            operand_b = self.process_operand(operand_b)
-        if instruction == instructions.inp:
+    def execute_instruction(self, instruction: str, operand_a: str, operand_b = None):
+        if instruction == 'inp':
             self.inp()
-        elif instruction == instructions.mul:
-            self.mul(operand_a, operand_b)
-        elif instruction == instructions.add:
-            self.add(operand_a, operand_b)
+        elif instruction == 'eql':
+            self.equal(operand_a, operand_b)
+        else:
+            self.arithmetic(instruction, operand_a, operand_b)
            
 
 

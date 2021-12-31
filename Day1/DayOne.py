@@ -1,8 +1,5 @@
-from typing import Counter
-
-
 def main():
-    input = read_from_file("DayOneInput")
+    input = read_from_file("Day1\DayOneInput")
     count = how_many_increments(input)
     print("DAY 1 PART 1 RESULT")
     print("===================")

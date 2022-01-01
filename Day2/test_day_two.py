@@ -1,4 +1,4 @@
-from DayTwo import *
+from DayTwo import calculate_position, calculate_position_two
 import pytest
 
 @pytest.mark.parametrize("test_input, expected", [ ([["forward",5]], (5,0) ), ([["forward",0]], (0,0) ) ] )

@@ -1,3 +1,4 @@
+"""Solution to Advent of Code 2021 Day 22"""
 from typing import Tuple, List
 from dataclasses import dataclass
 from time import perf_counter
@@ -36,11 +37,11 @@ class Reactor:
 
     def count_cubes_in_block(self, block: Block) -> int:
         """Counts number of cubes in block"""
-        x = block.x_dimension[1] - block.x_dimension[0] + 1
-        y = block.y_dimension[1] - block.y_dimension[0] + 1
-        z = block.z_dimension[1] - block.z_dimension[0] + 1
+        _x = block.x_dimension[1] - block.x_dimension[0] + 1
+        _y = block.y_dimension[1] - block.y_dimension[0] + 1
+        _z = block.z_dimension[1] - block.z_dimension[0] + 1
 
-        return x * y * z
+        return _x * _y * _z
 
     def process_instruction(self, instruction: Tuple[str, Block]):
         """Process single block"""
@@ -109,17 +110,20 @@ class Reactor:
         return chunks
 
     def subtract_blocks(self, large_block: Block, small_block: Block) -> List[Block]:
-        """Removes small_block from large_block where small_block is completely enveloped by large_block.
-        Returns a list of blocks which cover the remaining area"""
+        """
+        Removes small_block from large_block
+        where small_block is completely enveloped by large_block.
+        Returns a list of blocks which cover the remaining area
+        """
         x_chunks = self.chunk_1d(small_block.x_dimension, large_block.x_dimension)
         y_chunks = self.chunk_1d(small_block.y_dimension, large_block.y_dimension)
         z_chunks = self.chunk_1d(small_block.z_dimension, large_block.z_dimension)
 
         result = []
-        for x in x_chunks:
-            for y in y_chunks:
-                for z in z_chunks:
-                    result.append(Block(x, y, z))
+        for _x in x_chunks:
+            for _y in y_chunks:
+                for _z in z_chunks:
+                    result.append(Block(_x, _y, _z))
 
         result.remove(small_block)
         return result
@@ -154,6 +158,7 @@ class Reactor:
 
 
 def main():
+    """Read file and compute number of cubes lit following Reactor boot sequence"""
     print("Program Started")
     my_reactor = Reactor()
     print("Reading Input File")
@@ -166,7 +171,8 @@ def main():
         my_reactor.process_instruction(instruction)
         end = perf_counter()
         print(
-            f"Instruction {count} Processed in {int(end-start)} Seconds: {instruction[0], instruction[1]}"
+            f"Instruction {count} Processed in {int(end-start)} \
+                Seconds: {instruction[0], instruction[1]}"
         )
         count += 1
     print("\nFinished Processing All Instructions\nCounting Cubes...\n")
@@ -174,29 +180,31 @@ def main():
 
 
 def process_input_file(input_file: List[str]) -> List[Tuple[str, Block]]:
+    """Process Input file from list of strings to executable instructions"""
     instructions = []
     for line in input_file:
         on_off, co_ords = line.split(" ")
         co_ords = co_ords.split(",")
-        x, y, z = co_ords
-        x = x.split("=")[1].split("..")
-        x[0] = int(x[0])
-        x[1] = int(x[1])
-        y = y.split("=")[1].split("..")
-        y[0] = int(y[0])
-        y[1] = int(y[1])
-        z = z.split("=")[1].split("..")
-        z[0] = int(z[0])
-        z[1] = int(z[1])
-        instruction = (on_off, Block(x, y, z))
+        _x, _y, _z = co_ords
+        _x = _x.split("=")[1].split("..")
+        _x[0] = int(_x[0])
+        _x[1] = int(_x[1])
+        _y = _y.split("=")[1].split("..")
+        _y[0] = int(_y[0])
+        _y[1] = int(_y[1])
+        _z = _z.split("=")[1].split("..")
+        _z[0] = int(_z[0])
+        _z[1] = int(_z[1])
+        instruction = (on_off, Block(_x, _y, _z))
         instructions.append(instruction)
     return instructions
 
 
 def read_input_file(filename: str) -> List[str]:
+    """Read file from disk and convert to list of strings"""
     input_file = []
-    with open(filename, "r", encoding="utf8") as f:
-        for line in f:
+    with open(filename, "r", encoding="utf8") as file:
+        for line in file:
             input_file.append(line.strip())
     return input_file
 

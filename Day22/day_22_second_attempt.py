@@ -171,8 +171,7 @@ def main():
         my_reactor.process_instruction(instruction)
         end = perf_counter()
         print(
-            f"Instruction {count} Processed in {int(end-start)} \
-                Seconds: {instruction[0], instruction[1]}"
+            f"Instruction {count} Processed in {int(end-start)} Seconds: {instruction[0], instruction[1]}"
         )
         count += 1
     print("\nFinished Processing All Instructions\nCounting Cubes...\n")

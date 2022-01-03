@@ -1,5 +1,6 @@
 from typing import Tuple, List
 from dataclasses import dataclass
+from time import perf_counter
 
 
 @dataclass
@@ -41,18 +42,13 @@ class Reactor:
 
         return x * y * z
 
-    def execute_boot_sequence(self, instructions: List[Instruction]) -> None:
-        """Run through all boot sequence instructions"""
-        for instruction in instructions:
-            self.process_instruction(instruction)
-
     def process_instruction(self, instruction: Tuple[str, Block]):
         """Process single block"""
         state, block = instruction
         if state == "on":
-            self.process_on_block([block])
+            self.process_on_block(block)
         elif state == "off":
-            self.process_off_block([block])
+            self.process_off_block(block)
         else:
             print("Invalid Block State")
             print(block)
@@ -68,10 +64,10 @@ class Reactor:
                     splinters.append(new_block)
                 else:
                     splinters.extend(self.subtract_blocks(new_block, overlap))
-            if splinters == []:
+            if not splinters:
                 return  # Block is entirely covered by existing blocks
             unprocessed_blocks = splinters
-        if unprocessed_blocks != []:
+        if unprocessed_blocks:
             for new_block in unprocessed_blocks:
                 self.on_blocks.append(new_block)
 
@@ -113,7 +109,8 @@ class Reactor:
         return chunks
 
     def subtract_blocks(self, large_block: Block, small_block: Block) -> List[Block]:
-        """Removes small_block from large_block where small_block is completely enveloped by large_block. Returns a list of blocks which cover the remaining area"""
+        """Removes small_block from large_block where small_block is completely enveloped by large_block.
+        Returns a list of blocks which cover the remaining area"""
         x_chunks = self.chunk_1d(small_block.x_dimension, large_block.x_dimension)
         y_chunks = self.chunk_1d(small_block.y_dimension, large_block.y_dimension)
         z_chunks = self.chunk_1d(small_block.z_dimension, large_block.z_dimension)
@@ -157,35 +154,28 @@ class Reactor:
 
 
 def main():
+    print("Program Started")
     my_reactor = Reactor()
-    block_a = Block((0, 9), (0, 9), (0, 9))
-    block_b = Block((6, 15), (6, 15), (6, 15))
-
-    my_reactor.process_on_block([block_a])
-    my_reactor.process_on_block([block_b])
-    my_reactor.process_off_block(block_a)
-    my_reactor.process_off_block(block_b)
-
-    print(f"Block A: {my_reactor.count_cubes_in_block(block_a)} Cubes\n{block_a}\n")
-    print(f"Block B: {my_reactor.count_cubes_in_block(block_b)} Cubes\n{block_b}\n")
-
-    overlapping_block = my_reactor.overlap(block_a, block_b)
-    print(
-        f"Overlapping Block: {my_reactor.count_cubes_in_block(overlapping_block)} Cubes\n{overlapping_block}\n"
-    )
-    new_blocks = my_reactor.subtract_blocks(block_b, overlapping_block)
-
-    overlap_cubes = 0
-    for block in new_blocks:
-        overlap_cubes += my_reactor.count_cubes_in_block(block)
-    print(f"Additional Blocks: {overlap_cubes} Cubes")
-    for block in new_blocks:
-        print(block)
+    print("Reading Input File")
+    input_file = read_input_file("Day22\\DayTwentyTwoInput")
+    instructions = process_input_file(input_file)
+    print(f"Input File Processed: {len(instructions)} Instructions Found\n")
+    count = 1
+    for instruction in instructions:
+        start = perf_counter()
+        my_reactor.process_instruction(instruction)
+        end = perf_counter()
+        print(
+            f"Instruction {count} Processed in {int(end-start)} Seconds: {instruction[0], instruction[1]}"
+        )
+        count += 1
+    print("\nFinished Processing All Instructions\nCounting Cubes...\n")
+    print(f"{my_reactor.count_lit_cubes()}: Cubes Lit at end of sequence")
 
 
-def process_input_file(input: list) -> list:
-    output = []
-    for line in input:
+def process_input_file(input_file: List[str]) -> List[Tuple[str, Block]]:
+    instructions = []
+    for line in input_file:
         on_off, co_ords = line.split(" ")
         co_ords = co_ords.split(",")
         x, y, z = co_ords
@@ -198,17 +188,17 @@ def process_input_file(input: list) -> list:
         z = z.split("=")[1].split("..")
         z[0] = int(z[0])
         z[1] = int(z[1])
-        cuboid = (on_off, (x, y, z))
-        output.append(cuboid)
-    return output
+        instruction = (on_off, Block(x, y, z))
+        instructions.append(instruction)
+    return instructions
 
 
-def read_input_file(filename) -> list:
-    input = []
-    with open(filename, "r") as f:
+def read_input_file(filename: str) -> List[str]:
+    input_file = []
+    with open(filename, "r", encoding="utf8") as f:
         for line in f:
-            input.append(line.strip())
-    return input
+            input_file.append(line.strip())
+    return input_file
 
 
 if __name__ == "__main__":
